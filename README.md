@@ -2,6 +2,8 @@
 
 Client-bot fleet for MCCTF. Each bot is a real Minecraft client connection (Mineflayer) — the MCCTF plugin sees them as ordinary players.
 
+**▶️ Demo:** https://youtu.be/a_TpcwnKXjc — a full 5v5 match with the bot fleet.
+
 ## Versions (important)
 
 MCCTF only exists as a **1.8.x** plugin, so the **server runs Paper 1.8.8**. But you
