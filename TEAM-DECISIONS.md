@@ -2,7 +2,7 @@
 
 Design choices for the v2.a Coordinator. Settle these here BEFORE writing coordinator code, per `NEXT.md` sequencing step 1.
 
-**Scope:** 5v5 (or N-v-N), **all bots running the Heavy kit**. Per-kit scoring bias is deferred — see `NEXT.md` v3 for the kit-specific roadmap. v2.a treats every bot as identical at the scoring layer.
+**Scope:** 5v5 (or N-v-N), **all bots running the Heavy kit**. Per-kit scoring bias is deferred, see `NEXT.md` v3 for the kit-specific roadmap. v2.a treats every bot as identical at the scoring layer.
 
 ---
 
@@ -23,7 +23,7 @@ Every coordinator tick (1 Hz), each bot computes a score for each possible inten
 
 ### Intents in scope
 
-`push`, `defend`, `return`, `escort`, `capture`, `retreat` — same set as `NEXT.md` `BotIntent`.
+`push`, `defend`, `return`, `escort`, `capture`, `retreat`, same set as `NEXT.md` `BotIntent`.
 
 ### Score formula
 
@@ -31,21 +31,21 @@ Every coordinator tick (1 Hz), each bot computes a score for each possible inten
 score(bot, intent) = base_fit(bot, intent) × team_need(intent) × time_pressure(intent) − cost(bot, intent)
 ```
 
-- **`base_fit`** — how well does *this bot, right now* match this intent?
+- **`base_fit`**, how well does *this bot, right now* match this intent?
   - distance from bot to the relevant anchor (closer = higher for `defend` / `return` / `capture`; less relevant for `push`)
   - current HP (low HP downweights `push` / `return`, upweights `retreat`)
   - inventory state (carrying flag wool → `capture` dominates; out of food → `retreat` upweights)
-- **`team_need`** — global multipliers driven off blackboard state:
+- **`team_need`**, global multipliers driven off blackboard state:
   - our flag taken → `return` ×2.0 for everyone
   - we hold enemy flag → `escort` ×1.8 for non-carriers, `capture` ×3.0 for the carrier
   - midfield empty for >5 s → `push` ×1.3
-- **`time_pressure`** — match-clock-aware multiplier. This is the dimension to design carefully:
+- **`time_pressure`**, match-clock-aware multiplier. This is the dimension to design carefully:
   - **First 30 s of match:** `defend` ×0.7. No flag has moved yet; defenders are wasted.
   - **Tied score, <30 s left:** `push` ×2.0 if we don't hold a flag, `defend` ×2.0 if we do. Last-moment swing.
   - **Ahead on score, <60 s left:** `defend` ×1.6, `push` ×0.6. Clock-kill mode.
   - **Behind on score, <60 s left:** `push` ×1.6, `defend` ×0.4. Must-score mode.
   - **Otherwise (mid-match, normal):** all multipliers 1.0.
-- **`cost`** — pathing time, blocks-to-traverse, expected damage. Subtracted (not multiplied) so a bad intent can score negative.
+- **`cost`**, pathing time, blocks-to-traverse, expected damage. Subtracted (not multiplied) so a bad intent can score negative.
 
 ### Design decision: weights as data, not code
 
@@ -81,11 +81,11 @@ Constraints sit on top of utility scoring. The coordinator intervenes only when 
 
 ### Starter constraints (v2.a)
 
-- `at_least(1, bot.near(our_flag, radius=30))` — someone is always near our flag.
-- `at_least(1, bot.intent === 'push')` — never all 5 turtling on defense.
-- `no_more_than(3, bot.intent === 'push')` — never all 5 yolo'ing while own flag undefended.
-- `at_least(1, bot.escorting(our_carrier))` — when we have a carrier, one bot is glue.
-- `no_more_than(1, bot.intent === 'capture')` — only the actual carrier captures.
+- `at_least(1, bot.near(our_flag, radius=30))`, someone is always near our flag.
+- `at_least(1, bot.intent === 'push')`, never all 5 turtling on defense.
+- `no_more_than(3, bot.intent === 'push')`, never all 5 yolo'ing while own flag undefended.
+- `at_least(1, bot.escorting(our_carrier))`, when we have a carrier, one bot is glue.
+- `no_more_than(1, bot.intent === 'capture')`, only the actual carrier captures.
 
 ### Resolution algorithm
 
@@ -134,7 +134,7 @@ bid = payoff − cost(distance_to_task, hp_penalty, current_intent_value)
 winner = max bid; ties broken by lowest current_intent_value
 ```
 
-Where `current_intent_value` is exactly the utility score from §1 — directly the cost of abandoning the current intent. §1 and §3 share the same score function.
+Where `current_intent_value` is exactly the utility score from §1, directly the cost of abandoning the current intent. §1 and §3 share the same score function.
 
 ### Lifecycle rules
 
@@ -155,7 +155,7 @@ Where `current_intent_value` is exactly the utility score from §1 — directly 
 
 ## 4. Hysteresis + TUI integration
 
-Without hysteresis, per-tick utility scoring flips bots between intents constantly. The TUI ([NEXT.md v2.b](NEXT.md)) is what makes the whole system debuggable — and needs structured data showing *why* each decision was made.
+Without hysteresis, per-tick utility scoring flips bots between intents constantly. The TUI ([NEXT.md v2.b](NEXT.md)) is what makes the whole system debuggable, and needs structured data showing *why* each decision was made.
 
 ### Hysteresis rule
 
@@ -167,7 +167,7 @@ A bot keeps its current intent unless a competing intent beats it by **≥20% of
 
 ### `decision_trace` (what the coordinator must emit per bot, every tick)
 
-Plug this into the TUI work already in progress — extend the per-bot card from `NEXT.md` v2.b.
+Plug this into the TUI work already in progress, extend the per-bot card from `NEXT.md` v2.b.
 
 ```js
 {
@@ -199,7 +199,7 @@ Plug this into the TUI work already in progress — extend the per-bot card from
 ### Header band
 
 - match time elapsed / remaining
-- time_pressure regime (with visual cue when it changes — e.g. flash on transition into `clock_kill`)
+- time_pressure regime (with visual cue when it changes, e.g. flash on transition into `clock_kill`)
 - active constraints: all satisfied vs N violated, with which ones
 
 ### TODO
