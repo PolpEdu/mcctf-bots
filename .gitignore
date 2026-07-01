@@ -1,0 +1,7 @@
+node_modules/
+package-lock.json
+*.log
+.env
+*.pid
+.server.pid
+.bots.pid

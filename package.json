@@ -1,0 +1,21 @@
+{
+  "name": "mcctf-bots",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Client-bot fleet for MCCTF 1.8.8",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "spawn1": "node src/index.js --host 127.0.0.1 --port 25566 --count 1"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "mineflayer": "^4.37.1",
+    "mineflayer-pathfinder": "^2.4.5",
+    "mineflayer-pvp": "^1.3.2",
+    "mineflayer-auto-eat": "^5.0.3"
+  }
+}
