@@ -1,6 +1,22 @@
 # mcctf-bots
 
-Client-bot fleet for MCCTF 1.8.8. Each bot is a real Minecraft client connection (Mineflayer) — the MCCTF plugin sees them as ordinary players.
+Client-bot fleet for MCCTF. Each bot is a real Minecraft client connection (Mineflayer) — the MCCTF plugin sees them as ordinary players.
+
+## Versions (important)
+
+MCCTF only exists as a **1.8.x** plugin, so the **server runs Paper 1.8.8**. But you
+don't have to play on a 1.8 client:
+
+- **Server:** Paper **1.8.8** + MCCTF 3.7.2, with **ViaVersion + ViaBackwards + ViaRewind**
+  installed. That Via stack is what lets modern clients connect to the 1.8 server.
+- **Human players:** join with a **modern client (1.21)** — Via translates it down to 1.8.
+  This is how the project is actually played day-to-day.
+- **Bots:** connect **natively as 1.8.8** clients (`version: '1.8.8'` in `src/index.js`).
+  Mineflayer speaks 1.8 directly, so bots skip Via entirely and talk to the server in its
+  own protocol.
+
+So "runs on 1.21" refers to the *client you join with*, not the server. The server is
+1.8.8 and stays that way.
 
 ## Status
 
@@ -29,23 +45,65 @@ detailed roadmap and `TEAM-DECISIONS.md` for the coordinator design.
 
 ## Prereqs
 
-- Node.js 20+
-- A running MCCTF server on localhost:25566 (offline-mode for unauth'd usernames)
+- **Node.js 20+**
+- A running **MCCTF server** reachable on `localhost:25566`, with:
+  - `online-mode=false` in `server.properties` (bots use offline-auth usernames)
+  - ViaVersion + ViaBackwards + ViaRewind installed (so you can join with a 1.21 client — see [Versions](#versions-important))
+  - Launched on **JDK 17+** (JDK 22 recommended). The MCCTF/Via jars are Java 17 bytecode; a 32-bit Java 8 silently drops all plugins.
 
-## Install + run
+## How to run
+
+### 1. Start the MCCTF server
+
+From the server folder, on a modern JDK:
+
+```
+java --add-opens=java.base/java.lang=ALL-UNNAMED \
+     --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
+     -Xms1G -Xmx2G -jar paper.jar nogui
+```
+
+Wait for `Done (...)! For help, type "help"`.
+
+### 2. Spawn the bots
 
 ```
 cd E:\CTF-Rebuilded\mcctf-bots
-npm install
-npm run spawn1
+npm install                                   # first time only
+node src/index.js --count 10 --kit heavy      # a full 5v5 (MCCTF autobalances teams)
 ```
 
-CLI args:
+Other examples:
 
-- `--host <ip>` (default 127.0.0.1)
-- `--port <port>` (default 25565)
-- `--count <n>` (default 1)
-- `--username <prefix>` (default: random pick from bot-names.txt)
+```
+npm run spawn1                                 # single bot on 127.0.0.1:25566
+node src/index.js --kit heavy                  # one Heavy bot
+node src/index.js --count 5 --username NinjaSquad --kit ninja
+node src/index.js --count 10 --log-mode tui    # live per-bot TUI dashboard
+```
+
+### 3. Join and play
+
+Connect with your **1.21 client** to `localhost:25566` (or `<your-LAN-IP>:25566` from
+another device). Via translates you down to the 1.8 server. Pick a team and `/heavy`.
+
+### 4. Stop
+
+`Ctrl+C` in the bot terminal disconnects the fleet cleanly. Stop the server from its
+console with `stop`, or over RCON:
+
+```
+node scripts/rcon-stop.mjs 127.0.0.1 25577 <your-rcon-password> stop
+```
+
+### CLI args
+
+- `--host <ip>` (default `127.0.0.1`)
+- `--port <port>` (default `25566`)
+- `--count <n>` — number of bots (default `1`)
+- `--kit <name>` — kit to pick on spawn (default `heavy`; e.g. `ninja`, `archer`, `medic`)
+- `--username <prefix>` — fixed name prefix (default: unique random picks from `bot-names.txt`)
+- `--log-mode <verbose|tui>` — plain log stream (default) or the live TUI dashboard
 
 ## Why Node.js instead of Java
 
