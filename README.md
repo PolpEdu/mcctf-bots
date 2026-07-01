@@ -4,7 +4,28 @@ Client-bot fleet for MCCTF 1.8.8. Each bot is a real Minecraft client connection
 
 ## Status
 
-v0 spike. Connects to a 1.8.8 server, logs spawn position, retries on disconnect. No AI yet.
+v2 — a full 5v5 fleet runs. Each bot connects as a real 1.8.8 client, picks a kit
+(`/heavy`), fights team-aware, auto-eats to survive, and follows coordinator-driven
+CTF intents (attack the enemy flag, defend our own, chase carriers, escort, retreat).
+
+### Playtest notes (from live 5v5 runs)
+
+- **PvP looks almost-human.** Bots eat steak on low health and swing with a slight,
+  human-like delay rather than snapping instantly — deliberately *not* kill-aura-style
+  (instant-lock aim was a known problem to avoid, and this fleet doesn't do it).
+- **Emergent tactics.** With the coordinator wired, bots visibly defend and push the
+  flag, split between offense and defense rather than all clumping.
+- **Known issue: local-run lag.** Running the server and the whole bot fleet on one
+  machine makes the bots feel laggy (movement stutters). This is a **performance /
+  hosting** problem still being troubleshooted, not a bot-logic bug — a dedicated or
+  less-loaded host smooths it out.
+
+### Where the work is
+
+Performance (the local-run lag above) and PvP fidelity are the near-term focus.
+Strategy/coordination already works and matters long-term, but it's *not* the current
+bottleneck — combat feel and frame-consistency come first. See `NEXT.md` for the
+detailed roadmap and `TEAM-DECISIONS.md` for the coordinator design.
 
 ## Prereqs
 
@@ -37,9 +58,17 @@ See `../DeCTF2-NPC/DECISION-CLIENT-VS-SERVER.md`. Short version: server-side `Se
 ## Roadmap
 
 - [x] Connect, log spawn, auto-reconnect
-- [ ] mineflayer-pvp + mineflayer-auto-eat wired up
-- [ ] `/kit heavy` sent on spawn
-- [ ] Walk toward nearest enemy via mineflayer-pathfinder
-- [ ] CTF objective layer (grab flag, return flag, defend)
-- [ ] Team coordination (shared blackboard across bots in one process)
-- [ ] Fleet supervisor (`npm run fleet -- --count 10` keeps 10 bots alive)
+- [x] mineflayer-pvp + mineflayer-auto-eat wired up
+- [x] `/kit heavy` sent on spawn
+- [x] Walk toward nearest enemy via mineflayer-pathfinder
+- [x] Team-aware targeting (never hit same-team players)
+- [x] CTF objective layer — coordinator intents (push / defend / return / escort / retreat)
+- [x] Team coordination (shared blackboard across bots in one process)
+- [ ] **Performance: fix local-run lag** (smooth movement under a full fleet)
+- [ ] Tighten PvP feel (block-hits, sprint-reset knockback, per-tier difficulty)
+- [ ] Per-kit combat strategies (Medic heals, Archer kites, Ninja ambushes)
+- [ ] Fleet supervisor / autofill (keep N bots alive; human joins → bot leaves)
+
+## Acknowledgements
+
+Thanks to **SoCool21** for the original idea and pointing this in the right direction.
